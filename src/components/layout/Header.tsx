@@ -2,7 +2,8 @@ import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-
+import { RootState } from '../../store';
+import { logout } from '../../store/slices/authSlice';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
