@@ -1,0 +1,12 @@
+#remove node modules
+node_modules/
+#remove build folder
+build/
+#remove dist folder
+dist/
+#remove coverage folder
+coverage/
+#remove .env file
+.env
+#remove .env.local file
+.env.local
