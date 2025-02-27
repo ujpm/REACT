@@ -15,13 +15,12 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
-// App component
 const App: React.FC = () => {
   return (
     <Provider store={store}>
-      <Router>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route 
@@ -35,8 +34,8 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>
-        </ThemeProvider>
-      </Router>
+        </Router>
+      </ThemeProvider>
     </Provider>
   );
 };
