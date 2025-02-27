@@ -3,10 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Provider } from 'react-redux';
 import { store } from './store';
-
+import theme from './theme';
+import LandingPage from './pages/Landing/LandingPage';
+import Dashboard from './pages/Dashboard/Dashboard';
+import Login from './pages/Auth/Login';
+import Register from './pages/Auth/Register';
 
 // Protected Route component
-
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = store.getState().auth.isAuthenticated;
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
@@ -20,9 +23,22 @@ const App: React.FC = () => {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Routes>
-            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/" element={<LandingPage />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-
+          </Routes>
+        </ThemeProvider>
+      </Router>
+    </Provider>
+  );
+};
 
 export default App;
