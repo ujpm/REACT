@@ -19,7 +19,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions
+  DialogActions,
+  SelectChangeEvent
 } from '@mui/material';
 import { Lock, Send, Security } from '@mui/icons-material';
 
@@ -61,9 +62,14 @@ const ConfidentialReports: React.FC = () => {
     'Critical'
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+  ) => {
     const { name, value } = e.target;
-    setReport(prev => ({ ...prev, [name as string]: value }));
+    setReport((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {

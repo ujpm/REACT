@@ -12,7 +12,8 @@ import {
   Grid,
   Snackbar,
   Alert,
-  CircularProgress
+  CircularProgress,
+  SelectChangeEvent
 } from '@mui/material';
 import { PhotoCamera, Send } from '@mui/icons-material';
 
@@ -44,9 +45,14 @@ const ReportIssue: React.FC = () => {
     'Other'
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+  ) => {
     const { name, value } = e.target;
-    setIssueData(prev => ({ ...prev, [name as string]: value }));
+    setIssueData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
