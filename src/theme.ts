@@ -3,27 +3,27 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#54966a', // Green - Primary brand color
-      light: '#e8ebe9',
+      main: '#1c355c', // Deep blue - Primary brand color
+      light: '#2a4a7c',
+      dark: '#142844',
     },
     secondary: {
-      main: '#303d4c', // Navy blue - Secondary elements
+      main: '#6a5a82', // Purple - Secondary elements
+      light: '#8c7aa4',
+      dark: '#4c4160',
     },
-    error: {
-      main: '#e53935', // Red - REACT feature color
-      light: '#ffebee',
-    },
-    success: {
-      main: '#43a047', // Green - ACT feature color
-      light: '#e8f5e9',
+    warning: {
+      main: '#fed827', // Yellow - Accent color
+      light: '#fee359',
+      dark: '#cbb020',
     },
     background: {
-      default: '#f5f5f5',
+      default: '#f7f8f5', // Light cream - Background
       paper: '#ffffff',
     },
     text: {
-      primary: '#303d4c',
-      secondary: '#54966a',
+      primary: '#1c355c',
+      secondary: '#6a5a82',
     },
   },
   typography: {
