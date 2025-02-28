@@ -1,0 +1,21 @@
+{
+  "name": "react-civic-backend",
+  "version": "1.0.0",
+  "description": "Backend for REACT Civic Engagement Platform",
+  "main": "src/app.ts",
+  "scripts": {
+    "start": "node dist/app.js",
+    "dev": "nodemon src/app.ts",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "civic",
+    "engagement",
+    "express",
+    "typescript",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC"
+}
