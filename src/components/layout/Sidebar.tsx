@@ -156,10 +156,13 @@ const Sidebar: React.FC = () => {
       </Drawer>
 
       <Dialog open={loginDialog} onClose={() => setLoginDialog(false)}>
-        <DialogTitle>Authentication Required</DialogTitle>
+        <DialogTitle>Secure Access Required</DialogTitle>
         <DialogContent>
           <Typography>
-            Please log in or register to access this feature.
+            At REACT, ensuring the authenticity and security of community data is our mission. To maintain the integrity of our platform, we verify all users before granting access to this feature.
+          </Typography>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 2 }}>
+            Would you like to join our community or access your existing account?
           </Typography>
         </DialogContent>
         <DialogActions>
