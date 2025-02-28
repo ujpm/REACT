@@ -1,4 +1,4 @@
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express, { Express, Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
@@ -26,7 +26,7 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // Global error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error(err.stack);
   
   if (err.name === 'ValidationError') {
@@ -38,7 +38,9 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   }
   
   res.status(500).json({ error: 'Something went wrong!' });
-});
+};
+
+app.use(errorHandler);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
