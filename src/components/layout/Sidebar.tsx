@@ -30,29 +30,19 @@ import { navigationItems } from '../../config/navigation';
 const DRAWER_WIDTH = 240;
 const COLLAPSED_DRAWER_WIDTH = 65;
 
-interface StyledDrawerProps {
-  collapsed: boolean;
-}
-
-const StyledDrawer = styled(Drawer, {
-  shouldForwardProp: (prop) => prop !== 'collapsed',
-})<StyledDrawerProps>(({ theme, collapsed }) => ({
-  width: collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH,
+const StyledDrawer = styled(Drawer)(({ theme }) => ({
+  width: DRAWER_WIDTH,
   flexShrink: 0,
   whiteSpace: 'nowrap',
-  boxSizing: 'border-box',
   '& .MuiDrawer-paper': {
-    width: collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH,
+    width: DRAWER_WIDTH,
+    whiteSpace: 'nowrap',
+    backgroundColor: theme.palette.background.paper,
+    borderRight: `1px solid ${theme.palette.divider}`,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    backgroundColor: theme.palette.background.paper,
-    overflowX: 'hidden',
-    borderRight: `1px solid ${theme.palette.divider}`,
-    height: `calc(100% - 64px)`,
-    top: 64,
-    position: 'fixed',
   },
 }));
 
@@ -96,7 +86,7 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   
-  const [collapsed, setCollapsed] = useState(true);
+  const [open, setOpen] = useState(false);
   const [loginDialog, setLoginDialog] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
@@ -109,101 +99,100 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <>
-      <StyledDrawer
-        variant="permanent"
-        anchor="left"
-        collapsed={collapsed}
-        sx={{
-          width: collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH,
-          },
-        }}
-      >
-        <List>
-          <ListItem
-            sx={{
-              display: 'flex',
-              justifyContent: collapsed ? 'center' : 'flex-end',
-              px: 1,
-            }}
+    <StyledDrawer
+      variant="permanent"
+      open={open}
+      PaperProps={{
+        sx: {
+          width: open ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+        },
+      }}
+    >
+      <List>
+        <ListItem
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            px: 1,
+          }}
+        >
+          <IconButton onClick={() => setOpen(!open)}>
+            {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </ListItem>
+        {navigationItems.map((item) => (
+          <Tooltip 
+            key={item.path}
+            title={open ? item.title : ''}
+            placement="right"
+            arrow
           >
-            <IconButton onClick={() => setCollapsed(!collapsed)}>
-              {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            </IconButton>
-          </ListItem>
-          {navigationItems.map((item) => (
-            <Tooltip 
-              key={item.path}
-              title={collapsed ? item.title : ''}
-              placement="right"
-              arrow
-            >
-              <ListItem disablePadding>
-                <StyledListItemButton
-                  onClick={() => handleNavigation(item.path)}
-                  active={location.pathname === item.path ? 1 : 0}
-                  itemtype={item.type}
-                  onMouseEnter={() => setHoveredItem(item.path)}
-                  onMouseLeave={() => setHoveredItem(null)}
+            <ListItem disablePadding>
+              <StyledListItemButton
+                onClick={() => handleNavigation(item.path)}
+                active={location.pathname === item.path ? 1 : 0}
+                itemtype={item.type}
+                onMouseEnter={() => setHoveredItem(item.path)}
+                onMouseLeave={() => setHoveredItem(null)}
+                sx={{
+                  justifyContent: open ? 'flex-start' : 'center',
+                  px: open ? 3 : 2,
+                }}
+              >
+                <ListItemIcon
                   sx={{
-                    justifyContent: collapsed ? 'center' : 'flex-start',
-                    px: collapsed ? 2 : 3,
+                    minWidth: open ? 48 : 'auto',
+                    color: 'text.secondary',
                   }}
                 >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: collapsed ? 'auto' : 48,
-                      color: 'text.secondary',
-                    }}
-                  >
-                    <item.icon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.title}
-                    secondary={hoveredItem === item.path ? item.description : null}
-                    sx={{
-                      opacity: collapsed ? 0 : 1,
-                      transition: theme.transitions.create('opacity'),
-                      display: collapsed ? 'none' : 'block',
-                    }}
-                  />
-                </StyledListItemButton>
-              </ListItem>
-            </Tooltip>
-          ))}
-        </List>
-      </StyledDrawer>
+                  <item.icon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.title}
+                  secondary={hoveredItem === item.path ? item.description : null}
+                  sx={{
+                    opacity: open ? 1 : 0,
+                    transition: theme.transitions.create('opacity'),
+                    display: open ? 'block' : 'none',
+                  }}
+                />
+              </StyledListItemButton>
+            </ListItem>
+          </Tooltip>
+        ))}
+      </List>
+    </StyledDrawer>
 
-      <Dialog open={loginDialog} onClose={() => setLoginDialog(false)}>
-        <DialogTitle>Secure Access Required</DialogTitle>
-        <DialogContent>
-          <Typography>
-            At REACT, ensuring the authenticity and security of community data is our mission. 
-            To maintain the integrity of our platform, we verify all users before granting access to this feature.
-          </Typography>
-          <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 2 }}>
-            Would you like to join our community or access your existing account?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => {
-            setLoginDialog(false);
-            navigate('/register');
-          }}>
-            Join Community
-          </Button>
-          <Button onClick={() => {
-            setLoginDialog(false);
-            navigate('/login');
-          }} variant="contained">
-            Access Account
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+    <Dialog open={loginDialog} onClose={() => setLoginDialog(false)}>
+      <DialogTitle>Secure Access Required</DialogTitle>
+      <DialogContent>
+        <Typography>
+          At REACT, ensuring the authenticity and security of community data is our mission. 
+          To maintain the integrity of our platform, we verify all users before granting access to this feature.
+        </Typography>
+        <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 2 }}>
+          Would you like to join our community or access your existing account?
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => {
+          setLoginDialog(false);
+          navigate('/register');
+        }}>
+          Join Community
+        </Button>
+        <Button onClick={() => {
+          setLoginDialog(false);
+          navigate('/login');
+        }} variant="contained">
+          Access Account
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

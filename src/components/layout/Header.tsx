@@ -38,9 +38,8 @@ const Header: React.FC = () => {
 
   return (
     <AppBar 
-      position="sticky" 
+      position="static" 
       sx={{ 
-        zIndex: (theme) => theme.zIndex.drawer + 1,
         backgroundColor: 'background.paper',
         color: 'text.primary',
         boxShadow: 1,

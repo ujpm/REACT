@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, styled } from '@mui/material';
+import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
@@ -13,41 +14,45 @@ const COLLAPSED_DRAWER_WIDTH = 65;
 
 const LayoutRoot = styled(Box)({
   display: 'flex',
+  flexDirection: 'column',
   minHeight: '100vh',
-  overflow: 'hidden',
   width: '100%'
 });
 
-const LayoutContent = styled(Box)(({ theme }) => ({
+const LayoutContainer = styled(Box)({
   display: 'flex',
-  flex: '1 1 auto',
-  overflow: 'hidden',
-  paddingTop: 64, // Header height
-  backgroundColor: theme.palette.background.default,
-}));
+  flex: 1,
+  overflow: 'hidden'
+});
 
 const MainContent = styled(Box)({
   display: 'flex',
   flexDirection: 'column',
-  flex: '1 1 auto',
+  flex: 1,
   overflow: 'auto',
-  position: 'relative',
-  marginLeft: COLLAPSED_DRAWER_WIDTH,
-  padding: '24px',
-  transition: 'margin-left 0.3s ease',
+  minHeight: '100%',
+  paddingLeft: COLLAPSED_DRAWER_WIDTH,
+  transition: 'padding-left 0.3s ease',
 });
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const PageContent = styled(Box)({
+  flex: 1,
+  padding: '24px'
+});
+
+const Layout: React.FC = () => {
   return (
     <LayoutRoot>
       <Header />
-      <LayoutContent>
+      <LayoutContainer>
         <Sidebar />
         <MainContent>
-          {children}
+          <PageContent>
+            <Outlet />
+          </PageContent>
           <Footer />
         </MainContent>
-      </LayoutContent>
+      </LayoutContainer>
     </LayoutRoot>
   );
 };

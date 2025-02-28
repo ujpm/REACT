@@ -40,7 +40,7 @@ export const navigationItems: NavItem[] = [
   {
     id: 'confidential',
     title: 'Confidential Reports',
-    path: '/confidential',
+    path: '/confidential-reports',
     icon: SecurityIcon,
     type: 'REACT',
     description: 'Secure channel for sensitive issues'
@@ -48,7 +48,7 @@ export const navigationItems: NavItem[] = [
   {
     id: 'trending',
     title: 'Trending Issues',
-    path: '/trending',
+    path: '/trending-issues',
     icon: TrendingUpIcon,
     type: 'REACT',
     description: 'Community-voted urgent concerns'

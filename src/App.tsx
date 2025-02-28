@@ -49,8 +49,8 @@ const App: React.FC = () => {
           {/* REACT Features */}
           <Route path="/report-issue" element={<ReportIssue />} />
           <Route path="/track-issues" element={<TrackIssues />} />
-          <Route path="/confidential" element={<ConfidentialReports />} />
-          <Route path="/trending" element={<TrendingIssues />} />
+          <Route path="/confidential-reports" element={<ConfidentialReports />} />
+          <Route path="/trending-issues" element={<TrendingIssues />} />
 
           {/* ACT Features */}
           <Route path="/volunteer" element={<Volunteer />} />
