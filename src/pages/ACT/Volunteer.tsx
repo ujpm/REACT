@@ -22,7 +22,7 @@ import {
   AccessTime,
   LocationOn,
   People,
-  Volunteer as VolunteerIcon,
+  Handshake as VolunteerIcon,
 } from '@mui/icons-material';
 
 interface VolunteerOpportunity {
