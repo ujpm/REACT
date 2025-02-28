@@ -191,7 +191,7 @@ const Sidebar: React.FC = () => {
       <Dialog
         open={loginDialog}
         onClose={() => setLoginDialog(false)}
-        aria-labelledby="login-dialog-title"
+        aria-labelledby="auth-dialog-title"
         PaperProps={{
           sx: {
             borderRadius: 2,
@@ -199,24 +199,37 @@ const Sidebar: React.FC = () => {
           },
         }}
       >
-        <DialogTitle id="login-dialog-title">
-          Authentication Required
+        <DialogTitle id="auth-dialog-title" sx={{ color: 'primary.main' }}>
+          Secure Access Required
         </DialogTitle>
         <DialogContent>
-          <Typography>
-            You need to be logged in to access this feature. Would you like to log in or register?
+          <Typography sx={{ mb: 2 }}>
+            At REACT, ensuring the authenticity and security of community data is our mission. To maintain the integrity of our platform, we verify all users before granting access to this feature.
+          </Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            Would you like to join our community or access your existing account?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setLoginDialog(false)}>Cancel</Button>
-          <Button onClick={() => {
-            setLoginDialog(false);
-            navigate('/register');
-          }}>
-            Register
+          <Button onClick={() => setLoginDialog(false)} color="inherit">
+            Not Now
           </Button>
-          <Button onClick={handleLogin} variant="contained" color="primary">
-            Login
+          <Button 
+            onClick={() => {
+              setLoginDialog(false);
+              navigate('/register');
+            }}
+            variant="outlined"
+            color="primary"
+          >
+            Join Community
+          </Button>
+          <Button 
+            onClick={handleLogin} 
+            variant="contained" 
+            color="primary"
+          >
+            Access Account
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Box, Container, Paper, TextField, Button, Typography, Alert } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login, authenticateUser } from '../../store/slices/authSlice';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     email: '',
@@ -27,9 +28,10 @@ const Login: React.FC = () => {
     
     if (result.success && result.user) {
       dispatch(login({ user: result.user, token: result.token }));
-      navigate('/dashboard');
+      const returnUrl = location.state?.returnUrl || '/dashboard';
+      navigate(returnUrl);
     } else {
-      setError('Invalid email or password');
+      setError('We couldn\'t verify your credentials. Please check your email and password.');
     }
   };
 
@@ -43,8 +45,11 @@ const Login: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-          Sign in to REACT
+        <Typography component="h1" variant="h4" color="primary" sx={{ mb: 1 }}>
+          Welcome Back
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
+          Access your REACT account to continue making a difference in your community
         </Typography>
         <Paper
           elevation={3}
@@ -54,6 +59,7 @@ const Login: React.FC = () => {
             display: 'flex',
             flexDirection: 'column',
             gap: 2,
+            borderRadius: 2,
           }}
         >
           {error && (
@@ -89,30 +95,32 @@ const Login: React.FC = () => {
               type="submit"
               fullWidth
               variant="contained"
+              size="large"
               sx={{ mb: 2 }}
             >
-              Sign In
+              Access Account
             </Button>
           </form>
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              Test Credentials:
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              For demonstration purposes:
             </Typography>
             <Typography variant="caption" display="block" color="text.secondary">
-              Admin: admin@react.act / 2ACT
+              Community Admin: admin@react.act / 2ACT
             </Typography>
             <Typography variant="caption" display="block" color="text.secondary">
-              User: reactor@gmail.com / 2test
+              Community Member: reactor@gmail.com / 2test
             </Typography>
-          </Box>
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Link to="/register" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <Typography variant="body2" color="primary">
-                Don't have an account? Sign Up
-              </Typography>
-            </Link>
           </Box>
         </Paper>
+        <Box sx={{ mt: 3, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            New to REACT?{' '}
+            <Link to="/register" style={{ color: 'inherit', fontWeight: 'bold' }}>
+              Join our community
+            </Link>
+          </Typography>
+        </Box>
       </Box>
     </Container>
   );

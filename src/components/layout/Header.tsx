@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Stack } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
@@ -34,25 +34,39 @@ const Header: React.FC = () => {
             flexGrow: 1, 
             cursor: 'pointer',
             color: 'primary.main',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            letterSpacing: 1,
           }} 
           onClick={() => navigate('/')}
         >
           REACT
         </Typography>
 
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={2} alignItems="center">
           {isAuthenticated ? (
             <>
-              <Typography variant="body1" sx={{ alignSelf: 'center' }}>
-                {user?.email}
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: 'text.secondary',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
+                Welcome, {user?.email?.split('@')[0]}
               </Typography>
               <Button 
                 variant="outlined" 
                 color="primary"
                 onClick={handleLogout}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  px: 3
+                }}
               >
-                Logout
+                Exit Platform
               </Button>
             </>
           ) : (
@@ -61,15 +75,25 @@ const Header: React.FC = () => {
                 variant="outlined" 
                 color="primary"
                 onClick={() => navigate('/login')}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  px: 3
+                }}
               >
-                Login
+                Access Account
               </Button>
               <Button 
                 variant="contained" 
                 color="primary"
                 onClick={() => navigate('/register')}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  px: 3
+                }}
               >
-                Register
+                Join Community
               </Button>
             </>
           )}
