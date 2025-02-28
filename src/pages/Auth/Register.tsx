@@ -19,14 +19,37 @@ const Register: React.FC = () => {
     setError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       setError('The passwords you entered do not match. Please try again.');
       return;
     }
-    // Registration logic will be implemented later
-    navigate('/login');
+
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Registration successful
+        navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+      } else {
+        setError(data.message || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setError('An error occurred during registration. Please try again later.');
+      console.error('Registration error:', err);
+    }
   };
 
   return (

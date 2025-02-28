@@ -3,9 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 // Pages
-import LandingPage from '../pages/LandingPage';
-import Login from '../pages/auth/Login';
-import Register from '../pages/auth/Register';
+import LandingPage from '../pages/Landing/LandingPage';
+import Login from '../pages/Auth/Login';
+import Register from '../pages/Auth/Register';
 import ReportIssue from '../pages/REACT/ReportIssue';
 import TrackIssues from '../pages/REACT/TrackIssues';
 import ConfidentialReports from '../pages/REACT/ConfidentialReports';
