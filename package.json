@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && copy _redirects dist\\ && copy _headers dist\\",
+    "build:cloudflare": "tsc && vite build && cp _redirects dist/ && cp _headers dist/",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -21,7 +22,7 @@
     "react-router-dom": "^6.22.0"
   },
   "devDependencies": {
-    "@types/node": "^16.18.82",
+    "@types/node": "^20.11.19",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^7.0.1",
