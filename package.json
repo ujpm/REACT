@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && copy _redirects dist\\ && copy _headers dist\\",
@@ -22,7 +25,7 @@
     "react-router-dom": "^6.22.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.19",
+    "@types/node": "^18.0.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^7.0.1",
