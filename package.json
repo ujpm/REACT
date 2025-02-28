@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && copy _redirects dist\\ && copy _headers dist\\",
+    "build": "tsc && vite build && cp _redirects dist/ && cp _headers dist/",
     "build:cloudflare": "tsc && vite build && cp _redirects dist/ && cp _headers dist/",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"

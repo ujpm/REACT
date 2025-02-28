@@ -1,15 +1,10 @@
 [build]
 command = "npm install --legacy-peer-deps && npm run build"
-publish = "dist"
 
 [build.environment]
 NODE_VERSION = "18.17.1"
+NODE_ENV = "production"
 
 [site]
-bucket = "./dist"
-
-[build.processing]
-skip_source_maps = true
-
-[env.production]
-NODE_ENV = "production"
+bucket = "dist"
+pages_build_output_dir = "dist"
