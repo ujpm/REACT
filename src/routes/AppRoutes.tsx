@@ -4,11 +4,12 @@ import { useSelector } from 'react-redux';
 import Home from '../pages/Home';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
+import Layout from '../components/layout/Layout';
 import { RootState } from '../store';
 
-const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
+const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-  return isAuthenticated ? element : <Navigate to="/login" />;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
 const AppRoutes: React.FC = () => {
@@ -19,7 +20,16 @@ const AppRoutes: React.FC = () => {
       <Route path="/register" element={<Register />} />
       
       {/* Protected Routes */}
-      <Route path="/" element={<PrivateRoute element={<Home />} />} />
+      <Route
+        path="/"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <Home />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
       
       {/* Catch all - redirect to home */}
       <Route path="*" element={<Navigate to="/" />} />

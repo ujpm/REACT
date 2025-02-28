@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Box, Container, Paper, TextField, Button, Typography, Alert } from '@mui/material';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { login, authenticateUser, PREDEFINED_USERS } from '../../store/slices/authSlice';
+import { login } from '../../store/slices/authSlice';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const dispatch = useDispatch();
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -22,16 +21,33 @@ const Login: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = authenticateUser(formData.email, formData.password);
-    
-    if (result) {
-      dispatch(login(result));
-      // Navigate to the first page of REACT features
-      navigate('/report-issue');
-    } else {
-      setError('We couldn\'t verify your credentials. Please check your email and password.');
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        dispatch(login({
+          user: data.user,
+          token: data.token
+        }));
+        navigate('/');
+      } else {
+        setError(data.message || 'Invalid credentials');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+      console.error('Login error:', err);
     }
   };
 
@@ -49,7 +65,7 @@ const Login: React.FC = () => {
           Welcome Back
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
-          Access your REACT account to continue making a difference in your community
+          Access your account to continue
         </Typography>
 
         <Paper 
@@ -98,28 +114,15 @@ const Login: React.FC = () => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Access Account
+            Sign In
           </Button>
-
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              New to REACT?{' '}
-              <Link to="/register" style={{ color: 'inherit', fontWeight: 'bold' }}>
-                Join our community
+          
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <Typography variant="body2">
+              Don't have an account?{' '}
+              <Link to="/register" style={{ textDecoration: 'none' }}>
+                Sign Up
               </Link>
-            </Typography>
-          </Box>
-
-          {/* Demo Credentials */}
-          <Box sx={{ mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-            <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
-              For demonstration purposes:
-            </Typography>
-            <Typography variant="caption" color="text.secondary" component="div">
-              Community Admin: {PREDEFINED_USERS.admin.email} / {PREDEFINED_USERS.admin.password}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" component="div">
-              Community Member: {PREDEFINED_USERS.user.email} / {PREDEFINED_USERS.user.password}
             </Typography>
           </Box>
         </Paper>

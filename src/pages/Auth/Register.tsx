@@ -27,7 +27,7 @@ const Register: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/register', {
+      const response = await fetch('http://localhost:5000/api/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,7 +41,6 @@ const Register: React.FC = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Registration successful
         navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
       } else {
         setError(data.message || 'Registration failed. Please try again.');
