@@ -11,6 +11,12 @@ import {
   useMediaQuery,
   Tooltip,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -19,6 +25,8 @@ import {
   Map as MapIcon,
   People as CommunityIcon,
   Settings as SettingsIcon,
+  Home as HomeIcon,
+  Lock as LockIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -27,10 +35,11 @@ import { RootState } from '../../store';
 const drawerWidth = 240;
 
 const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-  { text: 'Report Issue', icon: <ReportIcon />, path: '/report-issue' },
-  { text: 'Issues Map', icon: <MapIcon />, path: '/issues-map' },
-  { text: 'Community', icon: <CommunityIcon />, path: '/community' },
+  { text: 'Home', icon: <HomeIcon />, path: '/', protected: false },
+  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', protected: true },
+  { text: 'Report Issue', icon: <ReportIcon />, path: '/report-issue', protected: true },
+  { text: 'Issues Map', icon: <MapIcon />, path: '/issues-map', protected: true },
+  { text: 'Community', icon: <CommunityIcon />, path: '/community', protected: true },
 ];
 
 const Sidebar: React.FC = () => {
@@ -39,7 +48,9 @@ const Sidebar: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [isOpen, setIsOpen] = useState(!isMobile);
   const [isHovered, setIsHovered] = useState(false);
-  const user = useSelector((state: RootState) => state.auth.user);
+  const [loginDialog, setLoginDialog] = useState(false);
+  const [selectedPath, setSelectedPath] = useState('');
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   const handleDrawerToggle = () => {
     setIsOpen(!isOpen);
@@ -49,6 +60,20 @@ const Sidebar: React.FC = () => {
     if (isMobile) return drawerWidth;
     if (isHovered || isOpen) return drawerWidth;
     return theme.spacing(7);
+  };
+
+  const handleNavigation = (path: string, isProtected: boolean) => {
+    if (isProtected && !isAuthenticated) {
+      setSelectedPath(path);
+      setLoginDialog(true);
+    } else {
+      navigate(path);
+    }
+  };
+
+  const handleLogin = () => {
+    setLoginDialog(false);
+    navigate('/login', { state: { returnUrl: selectedPath } });
   };
 
   const drawer = (
@@ -70,7 +95,7 @@ const Sidebar: React.FC = () => {
           >
             <ListItem
               button
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigation(item.path, item.protected)}
               sx={{
                 minHeight: 48,
                 justifyContent: isOpen || isHovered ? 'initial' : 'center',
@@ -82,12 +107,18 @@ const Sidebar: React.FC = () => {
                   minWidth: 0,
                   mr: isOpen || isHovered ? 2 : 'auto',
                   justifyContent: 'center',
+                  color: item.protected && !isAuthenticated ? 'text.disabled' : 'inherit',
                 }}
               >
-                {item.icon}
+                {item.protected && !isAuthenticated ? <LockIcon /> : item.icon}
               </ListItemIcon>
               {(isOpen || isHovered) && (
-                <ListItemText primary={item.text} />
+                <ListItemText 
+                  primary={item.text} 
+                  sx={{
+                    color: item.protected && !isAuthenticated ? 'text.disabled' : 'inherit',
+                  }}
+                />
               )}
             </ListItem>
           </Tooltip>
@@ -101,7 +132,7 @@ const Sidebar: React.FC = () => {
         >
           <ListItem
             button
-            onClick={() => navigate('/settings')}
+            onClick={() => handleNavigation('/settings', true)}
             sx={{
               minHeight: 48,
               justifyContent: isOpen || isHovered ? 'initial' : 'center',
@@ -113,16 +144,50 @@ const Sidebar: React.FC = () => {
                 minWidth: 0,
                 mr: isOpen || isHovered ? 2 : 'auto',
                 justifyContent: 'center',
+                color: !isAuthenticated ? 'text.disabled' : 'inherit',
               }}
             >
-              <SettingsIcon />
+              {!isAuthenticated ? <LockIcon /> : <SettingsIcon />}
             </ListItemIcon>
             {(isOpen || isHovered) && (
-              <ListItemText primary="Settings" />
+              <ListItemText 
+                primary="Settings" 
+                sx={{
+                  color: !isAuthenticated ? 'text.disabled' : 'inherit',
+                }}
+              />
             )}
           </ListItem>
         </Tooltip>
       </List>
+
+      {/* Login Dialog */}
+      <Dialog
+        open={loginDialog}
+        onClose={() => setLoginDialog(false)}
+        aria-labelledby="login-dialog-title"
+      >
+        <DialogTitle id="login-dialog-title">
+          Authentication Required
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            You need to be logged in to access this feature. Would you like to log in or register?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLoginDialog(false)}>Cancel</Button>
+          <Button onClick={() => {
+            setLoginDialog(false);
+            navigate('/register');
+          }}>
+            Register
+          </Button>
+          <Button onClick={handleLogin} variant="contained" color="primary">
+            Login
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 

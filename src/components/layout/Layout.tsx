@@ -2,19 +2,18 @@ import React from 'react';
 import { Box } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { useLocation } from 'react-router-dom';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const location = useLocation();
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {isAuthenticated && <Sidebar />}
+      <Sidebar />
       <Box
         component="main"
         sx={{
@@ -25,7 +24,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         }}
       >
         <Header />
-        <Box sx={{ flexGrow: 1, p: 3 }}>
+        <Box sx={{ 
+          flexGrow: 1, 
+          p: 3,
+          width: '100%'
+        }}>
           {children}
         </Box>
       </Box>
