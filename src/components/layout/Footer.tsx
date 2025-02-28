@@ -4,7 +4,7 @@ import {
   Container,
   Grid,
   Typography,
-  Link,
+  Link as MuiLink,
   IconButton,
   useTheme,
   styled,
@@ -38,7 +38,7 @@ const StyledFooter = styled(Box)(({ theme }) => ({
   },
 }));
 
-const FooterLink = styled(Link)(({ theme }) => ({
+const FooterLink = styled(MuiLink)(({ theme }) => ({
   color: 'inherit',
   textDecoration: 'none',
   '&:hover': {
@@ -101,18 +101,38 @@ const Footer: React.FC = () => {
               Empowering communities through collective action. Report, engage, and transform your neighborhood together.
             </Typography>
             <Box sx={{ mt: 2 }}>
-              <SocialButton component="a" href="https://facebook.com" target="_blank">
+              <IconButton
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: 'inherit', '&:hover': { color: theme.palette.warning.main } }}
+              >
                 <FacebookIcon />
-              </SocialButton>
-              <SocialButton component="a" href="https://twitter.com" target="_blank">
+              </IconButton>
+              <IconButton
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: 'inherit', '&:hover': { color: theme.palette.warning.main } }}
+              >
                 <TwitterIcon />
-              </SocialButton>
-              <SocialButton component="a" href="https://linkedin.com" target="_blank">
+              </IconButton>
+              <IconButton
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: 'inherit', '&:hover': { color: theme.palette.warning.main } }}
+              >
                 <LinkedInIcon />
-              </SocialButton>
-              <SocialButton component="a" href="https://github.com" target="_blank">
+              </IconButton>
+              <IconButton
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: 'inherit', '&:hover': { color: theme.palette.warning.main } }}
+              >
                 <GitHubIcon />
-              </SocialButton>
+              </IconButton>
             </Box>
           </Grid>
 
@@ -125,9 +145,17 @@ const Footer: React.FC = () => {
               <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
                 {section.links.map((link) => (
                   <Box component="li" key={link.name} sx={{ mb: 1 }}>
-                    <FooterLink component={RouterLink} to={link.path}>
+                    <MuiLink
+                      component={RouterLink}
+                      to={link.path}
+                      sx={{
+                        color: 'inherit',
+                        textDecoration: 'none',
+                        '&:hover': { color: theme.palette.warning.main },
+                      }}
+                    >
                       {link.name}
-                    </FooterLink>
+                    </MuiLink>
                   </Box>
                 ))}
               </Box>
@@ -155,7 +183,7 @@ const Footer: React.FC = () => {
           }}
         >
           <Typography variant="body2" sx={{ opacity: 0.7 }}>
-            © {currentYear} REACT. All rights reserved.
+            &copy; {currentYear} REACT. All rights reserved.
           </Typography>
         </Box>
       </Container>

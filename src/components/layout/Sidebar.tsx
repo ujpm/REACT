@@ -16,6 +16,7 @@ import {
   DialogActions,
   Typography,
   Button,
+  ListItemButton,
 } from '@mui/material';
 import {
   ChevronLeft as ChevronLeftIcon,
@@ -24,7 +25,7 @@ import {
   Timeline as TimelineIcon,
   Security as SecurityIcon,
   TrendingUp as TrendingUpIcon,
-  Volunteer as VolunteerIcon,
+  Handshake as HandshakeIcon,
   Campaign as CampaignIcon,
   Groups as GroupsIcon,
   EmojiEvents as EmojiEventsIcon,
@@ -36,32 +37,36 @@ import { RootState } from '../../store';
 const DRAWER_WIDTH = 240;
 const COLLAPSED_DRAWER_WIDTH = 65;
 
-const StyledDrawer = styled(Drawer, {
-  shouldForwardProp: (prop) => prop !== 'open' && prop !== 'collapsed',
-})<{
-  open: boolean;
+interface StyledDrawerProps {
   collapsed: boolean;
-}>(({ theme, open, collapsed }) => ({
+}
+
+const StyledDrawer = styled(Drawer, {
+  shouldForwardProp: (prop) => prop !== 'collapsed',
+})<StyledDrawerProps>(({ theme, collapsed }) => ({
   width: collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH,
   flexShrink: 0,
   whiteSpace: 'nowrap',
   boxSizing: 'border-box',
   '& .MuiDrawer-paper': {
     width: collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH,
-    transition: theme.transitions.create(['width', 'margin'], {
+    transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
     backgroundColor: theme.palette.background.paper,
     overflowX: 'hidden',
     borderRight: `1px solid ${theme.palette.divider}`,
+    marginTop: 64, // Header height
   },
 }));
 
-const StyledListItem = styled(ListItem)<{ 
+interface StyledListItemProps {
   active: number;
   itemtype: 'react' | 'act';
-}>(({ theme, active, itemtype }) => ({
+}
+
+const StyledListItemButton = styled(ListItemButton)<StyledListItemProps>(({ theme, active, itemtype }) => ({
   margin: '4px 8px',
   padding: '10px 16px',
   borderRadius: theme.shape.borderRadius,
@@ -132,7 +137,7 @@ const navItems: NavItem[] = [
   {
     title: 'Volunteer & Donate',
     path: '/volunteer',
-    icon: <VolunteerIcon />,
+    icon: <HandshakeIcon />,
     type: 'act',
     description: 'Support community initiatives'
   },
@@ -181,23 +186,21 @@ const Sidebar: React.FC = () => {
     <>
       <StyledDrawer
         variant="permanent"
-        open={true}
+        anchor="left"
         collapsed={collapsed}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: collapsed ? 'center' : 'flex-end',
-            padding: theme.spacing(0, 1),
-            ...theme.mixins.toolbar,
-          }}
-        >
-          <IconButton onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-        </Box>
         <List>
+          <ListItem
+            sx={{
+              display: 'flex',
+              justifyContent: collapsed ? 'center' : 'flex-end',
+              px: 1,
+            }}
+          >
+            <IconButton onClick={() => setCollapsed(!collapsed)}>
+              {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+          </ListItem>
           {navItems.map((item) => (
             <Tooltip 
               key={item.path}
@@ -205,36 +208,37 @@ const Sidebar: React.FC = () => {
               placement="right"
               arrow
             >
-              <StyledListItem
-                button
-                onClick={() => handleNavigation(item.path)}
-                active={location.pathname === item.path ? 1 : 0}
-                itemtype={item.type}
-                onMouseEnter={() => setHoveredItem(item.path)}
-                onMouseLeave={() => setHoveredItem(null)}
-                sx={{
-                  justifyContent: collapsed ? 'center' : 'flex-start',
-                  px: collapsed ? 2 : 3,
-                }}
-              >
-                <ListItemIcon
+              <ListItem disablePadding>
+                <StyledListItemButton
+                  onClick={() => handleNavigation(item.path)}
+                  active={location.pathname === item.path ? 1 : 0}
+                  itemtype={item.type}
+                  onMouseEnter={() => setHoveredItem(item.path)}
+                  onMouseLeave={() => setHoveredItem(null)}
                   sx={{
-                    minWidth: collapsed ? 'auto' : 48,
-                    color: 'text.secondary',
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    px: collapsed ? 2 : 3,
                   }}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.title}
-                  secondary={hoveredItem === item.path ? item.description : null}
-                  sx={{
-                    opacity: collapsed ? 0 : 1,
-                    transition: theme.transitions.create('opacity'),
-                    display: collapsed ? 'none' : 'block',
-                  }}
-                />
-              </StyledListItem>
+                  <ListItemIcon
+                    sx={{
+                      minWidth: collapsed ? 'auto' : 48,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.title}
+                    secondary={hoveredItem === item.path ? item.description : null}
+                    sx={{
+                      opacity: collapsed ? 0 : 1,
+                      transition: theme.transitions.create('opacity'),
+                      display: collapsed ? 'none' : 'block',
+                    }}
+                  />
+                </StyledListItemButton>
+              </ListItem>
             </Tooltip>
           ))}
         </List>

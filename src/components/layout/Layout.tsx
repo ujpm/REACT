@@ -25,15 +25,15 @@ const Main = styled('main')(({ theme }) => ({
 const ContentWrapper = styled(Box)(({ theme }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
-  paddingTop: 64 + theme.spacing(3), // Header height + padding
+  paddingTop: theme.spacing(3),
 }));
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Header />
       <Sidebar />
       <Main>
-        <Header />
         <ContentWrapper>
           {children}
         </ContentWrapper>
