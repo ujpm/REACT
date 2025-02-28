@@ -1,13 +1,25 @@
 import React from 'react';
-import { Box, Container, Typography, Button, Grid, Paper } from '@mui/material';
+import { Box, Container, Typography, Button, Grid, Paper, AppBar, Toolbar, useTheme, useMediaQuery } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import CommunityIcon from '@mui/icons-material/People';
 import ReportIcon from '@mui/icons-material/Report';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+
+const PublicHeader = styled(AppBar)(({ theme }) => ({
+  background: 'transparent',
+  boxShadow: 'none',
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 2,
+}));
 
 const HeroSection = styled(Box)(({ theme }) => ({
-  minHeight: '80vh',
+  minHeight: '100vh',
   display: 'flex',
   alignItems: 'center',
   background: `linear-gradient(45deg, ${theme.palette.primary.main}88, ${theme.palette.secondary.main}88)`,
@@ -39,8 +51,48 @@ const FeatureCard = styled(Paper)(({ theme }) => ({
 }));
 
 const LandingPage: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+
   return (
     <Box>
+      <PublicHeader>
+        <Toolbar sx={{ justifyContent: 'flex-end' }}>
+          {isAuthenticated ? (
+            <Button
+              component={RouterLink}
+              to="/report-issue"
+              variant="contained"
+              color="primary"
+              sx={{ mr: 2 }}
+            >
+              Go to Dashboard
+            </Button>
+          ) : (
+            <>
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="outlined"
+                color="primary"
+                sx={{ mr: 2 }}
+              >
+                Login
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/register"
+                variant="contained"
+                color="primary"
+              >
+                Register
+              </Button>
+            </>
+          )}
+        </Toolbar>
+      </PublicHeader>
+
       <HeroSection>
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Grid container spacing={4} alignItems="center">
@@ -50,7 +102,7 @@ const LandingPage: React.FC = () => {
                 component="h1"
                 sx={{
                   fontWeight: 700,
-                  color: 'primary.light',
+                  color: 'white',
                   mb: 2,
                   fontSize: { xs: '2.5rem', md: '3.5rem' },
                 }}
@@ -60,28 +112,30 @@ const LandingPage: React.FC = () => {
               <Typography
                 variant="h4"
                 sx={{
-                  color: 'primary.light',
+                  color: 'white',
                   mb: 4,
                   fontWeight: 300,
                 }}
               >
                 Empowering Communities, Driving Change
               </Typography>
-              <Button
-                component={Link}
-                to="/register"
-                variant="contained"
-                size="large"
-                sx={{
-                  bgcolor: 'success.main',
-                  color: 'white',
-                  '&:hover': {
-                    bgcolor: 'success.dark',
-                  },
-                }}
-              >
-                Join the Movement
-              </Button>
+              {!isAuthenticated && (
+                <Button
+                  component={RouterLink}
+                  to="/register"
+                  variant="contained"
+                  size="large"
+                  sx={{
+                    bgcolor: 'success.main',
+                    color: 'white',
+                    '&:hover': {
+                      bgcolor: 'success.dark',
+                    },
+                  }}
+                >
+                  Join the Movement
+                </Button>
+              )}
             </Grid>
           </Grid>
         </Container>
@@ -100,33 +154,33 @@ const LandingPage: React.FC = () => {
           <Grid item xs={12} md={4}>
             <FeatureCard>
               <ReportIcon sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />
-              <Typography variant="h5" component="h3" sx={{ mb: 2 }}>
+              <Typography variant="h5" gutterBottom>
                 Report Issues
               </Typography>
               <Typography color="text.secondary">
-                Easily report and track community issues with AI-powered categorization
+                Easily report community issues with our AI-powered system that helps categorize and prioritize concerns.
               </Typography>
             </FeatureCard>
           </Grid>
           <Grid item xs={12} md={4}>
             <FeatureCard>
               <CommunityIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-              <Typography variant="h5" component="h3" sx={{ mb: 2 }}>
+              <Typography variant="h5" gutterBottom>
                 Community Action
               </Typography>
               <Typography color="text.secondary">
-                Connect with neighbors and organize community initiatives
+                Connect with local organizations and fellow citizens to take meaningful action on reported issues.
               </Typography>
             </FeatureCard>
           </Grid>
           <Grid item xs={12} md={4}>
             <FeatureCard>
               <AnalyticsIcon sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
-              <Typography variant="h5" component="h3" sx={{ mb: 2 }}>
+              <Typography variant="h5" gutterBottom>
                 Track Progress
               </Typography>
               <Typography color="text.secondary">
-                Monitor the impact of community actions and celebrate achievements
+                Monitor the status of reported issues and see the real impact of community engagement.
               </Typography>
             </FeatureCard>
           </Grid>
