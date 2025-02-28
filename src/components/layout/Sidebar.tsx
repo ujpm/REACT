@@ -9,14 +9,13 @@ import {
   Box,
   useTheme,
   useMediaQuery,
-  Tooltip,
-  Divider,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
   Typography,
+  alpha,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -26,13 +25,13 @@ import {
   People as CommunityIcon,
   Settings as SettingsIcon,
   Home as HomeIcon,
-  Lock as LockIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 
 const drawerWidth = 240;
+const closedDrawerWidth = 65;
 
 const menuItems = [
   { text: 'Home', icon: <HomeIcon />, path: '/', protected: false },
@@ -45,21 +44,15 @@ const menuItems = [
 const Sidebar: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [isOpen, setIsOpen] = useState(!isMobile);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [loginDialog, setLoginDialog] = useState(false);
   const [selectedPath, setSelectedPath] = useState('');
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   const handleDrawerToggle = () => {
     setIsOpen(!isOpen);
-  };
-
-  const getDrawerWidth = () => {
-    if (isMobile) return drawerWidth;
-    if (isHovered || isOpen) return drawerWidth;
-    return theme.spacing(7);
   };
 
   const handleNavigation = (path: string, isProtected: boolean) => {
@@ -82,83 +75,116 @@ const Sidebar: React.FC = () => {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        overflow: 'hidden',
       }}
-      onMouseEnter={() => !isMobile && setIsHovered(true)}
-      onMouseLeave={() => !isMobile && setIsHovered(false)}
     >
       <List>
         {menuItems.map((item) => (
-          <Tooltip
-            key={item.text}
-            title={(!isOpen && !isHovered) ? item.text : ''}
-            placement="right"
-          >
-            <ListItem
-              button
-              onClick={() => handleNavigation(item.path, item.protected)}
-              sx={{
-                minHeight: 48,
-                justifyContent: isOpen || isHovered ? 'initial' : 'center',
-                px: 2.5,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: isOpen || isHovered ? 2 : 'auto',
-                  justifyContent: 'center',
-                  color: item.protected && !isAuthenticated ? 'text.disabled' : 'inherit',
-                }}
-              >
-                {item.protected && !isAuthenticated ? <LockIcon /> : item.icon}
-              </ListItemIcon>
-              {(isOpen || isHovered) && (
-                <ListItemText 
-                  primary={item.text} 
-                  sx={{
-                    color: item.protected && !isAuthenticated ? 'text.disabled' : 'inherit',
-                  }}
-                />
-              )}
-            </ListItem>
-          </Tooltip>
-        ))}
-      </List>
-      <Divider />
-      <List sx={{ marginTop: 'auto' }}>
-        <Tooltip
-          title={(!isOpen && !isHovered) ? 'Settings' : ''}
-          placement="right"
-        >
           <ListItem
-            button
-            onClick={() => handleNavigation('/settings', true)}
+            key={item.text}
+            onClick={() => handleNavigation(item.path, item.protected)}
             sx={{
               minHeight: 48,
-              justifyContent: isOpen || isHovered ? 'initial' : 'center',
               px: 2.5,
+              cursor: 'pointer',
+              transition: theme.transitions.create(['background-color', 'color', 'padding'], {
+                duration: theme.transitions.duration.standard,
+              }),
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                paddingLeft: 3,
+                '& .MuiListItemIcon-root': {
+                  color: theme.palette.primary.main,
+                },
+                '& .MuiListItemText-root': {
+                  color: theme.palette.primary.main,
+                },
+              },
+              ...(location.pathname === item.path && {
+                backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                '& .MuiListItemIcon-root': {
+                  color: theme.palette.primary.main,
+                },
+                '& .MuiListItemText-root': {
+                  color: theme.palette.primary.main,
+                },
+              }),
             }}
           >
             <ListItemIcon
               sx={{
                 minWidth: 0,
-                mr: isOpen || isHovered ? 2 : 'auto',
+                mr: isOpen ? 2 : 'auto',
                 justifyContent: 'center',
-                color: !isAuthenticated ? 'text.disabled' : 'inherit',
+                transition: theme.transitions.create(['margin', 'color'], {
+                  duration: theme.transitions.duration.standard,
+                }),
               }}
             >
-              {!isAuthenticated ? <LockIcon /> : <SettingsIcon />}
+              {item.icon}
             </ListItemIcon>
-            {(isOpen || isHovered) && (
-              <ListItemText 
-                primary="Settings" 
-                sx={{
-                  color: !isAuthenticated ? 'text.disabled' : 'inherit',
-                }}
-              />
-            )}
+            <ListItemText
+              primary={item.text}
+              sx={{
+                opacity: isOpen ? 1 : 0,
+                transition: theme.transitions.create(['opacity', 'transform'], {
+                  duration: theme.transitions.duration.standard,
+                }),
+                transform: isOpen ? 'translateX(0)' : 'translateX(-10px)',
+                whiteSpace: 'nowrap',
+              }}
+            />
           </ListItem>
-        </Tooltip>
+        ))}
+      </List>
+
+      {/* Settings at the bottom */}
+      <List sx={{ marginTop: 'auto' }}>
+        <ListItem
+          onClick={() => handleNavigation('/settings', true)}
+          sx={{
+            minHeight: 48,
+            px: 2.5,
+            cursor: 'pointer',
+            transition: theme.transitions.create(['background-color', 'color', 'padding'], {
+              duration: theme.transitions.duration.standard,
+            }),
+            '&:hover': {
+              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              paddingLeft: 3,
+              '& .MuiListItemIcon-root': {
+                color: theme.palette.primary.main,
+              },
+              '& .MuiListItemText-root': {
+                color: theme.palette.primary.main,
+              },
+            },
+          }}
+        >
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              mr: isOpen ? 2 : 'auto',
+              justifyContent: 'center',
+              transition: theme.transitions.create(['margin', 'color'], {
+                duration: theme.transitions.duration.standard,
+              }),
+            }}
+          >
+            <SettingsIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Settings"
+            sx={{
+              opacity: isOpen ? 1 : 0,
+              transition: theme.transitions.create(['opacity', 'transform'], {
+                duration: theme.transitions.duration.standard,
+              }),
+              transform: isOpen ? 'translateX(0)' : 'translateX(-10px)',
+              whiteSpace: 'nowrap',
+            }}
+          />
+        </ListItem>
       </List>
 
       {/* Login Dialog */}
@@ -166,6 +192,12 @@ const Sidebar: React.FC = () => {
         open={loginDialog}
         onClose={() => setLoginDialog(false)}
         aria-labelledby="login-dialog-title"
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            p: 1,
+          },
+        }}
       >
         <DialogTitle id="login-dialog-title">
           Authentication Required
@@ -212,19 +244,18 @@ const Sidebar: React.FC = () => {
         variant={isMobile ? 'temporary' : 'permanent'}
         open={isOpen}
         onClose={handleDrawerToggle}
+        onMouseEnter={() => !isMobile && setIsOpen(true)}
+        onMouseLeave={() => !isMobile && setIsOpen(false)}
         sx={{
-          width: getDrawerWidth(),
+          width: isOpen ? drawerWidth : closedDrawerWidth,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: getDrawerWidth(),
+            width: isOpen ? drawerWidth : closedDrawerWidth,
             boxSizing: 'border-box',
-            transition: theme.transitions.create('width', {
+            overflowX: 'hidden',
+            transition: theme.transitions.create(['width'], {
+              duration: theme.transitions.duration.standard,
               easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
-            ...(!isOpen && !isHovered && !isMobile && {
-              overflowX: 'hidden',
-              width: theme.spacing(7),
             }),
           },
         }}
