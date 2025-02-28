@@ -30,11 +30,13 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error(err.stack);
   
   if (err.name === 'ValidationError') {
-    return res.status(400).json({ error: err.message });
+    res.status(400).json({ error: err.message });
+    return;
   }
   
   if (err.name === 'UnauthorizedError') {
-    return res.status(401).json({ error: 'Invalid token' });
+    res.status(401).json({ error: 'Invalid token' });
+    return;
   }
   
   res.status(500).json({ error: 'Something went wrong!' });
