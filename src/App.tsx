@@ -1,5 +1,6 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import theme from './theme';
 import Layout from './components/layout/Layout';
@@ -30,39 +31,43 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        
-        {/* Protected routes with Layout */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          {/* REACT Features */}
-          <Route path="/report-issue" element={<ReportIssue />} />
-          <Route path="/track-issues" element={<TrackIssues />} />
-          <Route path="/confidential-reports" element={<ConfidentialReports />} />
-          <Route path="/trending-issues" element={<TrendingIssues />} />
+    <Router>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            {/* Protected routes with Layout */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              {/* REACT Features */}
+              <Route path="/report-issue" element={<ReportIssue />} />
+              <Route path="/track-issues" element={<TrackIssues />} />
+              <Route path="/confidential-reports" element={<ConfidentialReports />} />
+              <Route path="/trending-issues" element={<TrendingIssues />} />
 
-          {/* ACT Features */}
-          <Route path="/volunteer" element={<Volunteer />} />
-          <Route path="/campaigns" element={<Campaigns />} />
-          <Route path="/collaborate" element={<Collaborate />} />
-          <Route path="/achievements" element={<Achievements />} />
-        </Route>
+              {/* ACT Features */}
+              <Route path="/volunteer" element={<Volunteer />} />
+              <Route path="/campaigns" element={<Campaigns />} />
+              <Route path="/collaborate" element={<Collaborate />} />
+              <Route path="/achievements" element={<Achievements />} />
+            </Route>
 
-        {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </ThemeProvider>
+            {/* Fallback route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
+    </Router>
   );
 };
 
