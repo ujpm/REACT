@@ -16,6 +16,7 @@ import {
   GitHub as GitHubIcon,
 } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
+import patternDark from '../../assets/shared/backgrounds/pattern-dark.svg';
 
 const StyledFooter = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -31,7 +32,7 @@ const StyledFooter = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundImage: `url(${require('../../assets/shared/backgrounds/pattern-dark.svg')})`,
+    backgroundImage: `url(${patternDark})`,
     backgroundRepeat: 'repeat',
     backgroundSize: '100px',
     opacity: 0.1,
