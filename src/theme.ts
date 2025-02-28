@@ -3,20 +3,22 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#54966a', // Green - Primary brand color for main actions and headers
-      light: '#e8ebe9', // Light gray - Background and subtle elements
+      main: '#54966a', // Green - Primary brand color
+      light: '#e8ebe9',
     },
     secondary: {
-      main: '#303d4c', // Navy blue - Secondary elements and text
+      main: '#303d4c', // Navy blue - Secondary elements
     },
     error: {
-      main: '#eb343a', // Red - Error states and important alerts
+      main: '#e53935', // Red - REACT feature color
+      light: '#ffebee',
     },
     success: {
-      main: '#afbc0e', // Lime - Success states and positive actions
+      main: '#43a047', // Green - ACT feature color
+      light: '#e8f5e9',
     },
     background: {
-      default: '#e8ebe9',
+      default: '#f5f5f5',
       paper: '#ffffff',
     },
     text: {
@@ -34,6 +36,23 @@ const theme = createTheme({
       'Arial',
       'sans-serif',
     ].join(','),
+    h5: {
+      fontWeight: 600,
+    },
+    body1: {
+      fontSize: '1rem',
+    },
+    body2: {
+      fontSize: '0.875rem',
+    },
+    caption: {
+      fontSize: '0.75rem',
+    },
+    overline: {
+      fontSize: '0.75rem',
+      fontWeight: 600,
+      letterSpacing: '0.1em',
+    },
   },
   components: {
     MuiButton: {
@@ -41,6 +60,21 @@ const theme = createTheme({
         root: {
           borderRadius: 8,
           textTransform: 'none',
+          fontWeight: 500,
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+        },
+      },
+    },
+    MuiListItem: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
         },
       },
     },
