@@ -17,12 +17,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
-// Public Route component (redirects to dashboard if already authenticated)
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const isAuthenticated = store.getState().auth.isAuthenticated;
-  return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" />;
-};
-
 // App component
 const App: React.FC = () => {
   return (
@@ -32,14 +26,12 @@ const App: React.FC = () => {
           <CssBaseline />
           <Layout>
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <PublicRoute>
-                    <LandingPage />
-                  </PublicRoute>
-                }
-              />
+              {/* Public routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+
+              {/* Protected routes */}
               <Route
                 path="/dashboard"
                 element={
@@ -56,22 +48,7 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/login"
-                element={
-                  <PublicRoute>
-                    <Login />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/register"
-                element={
-                  <PublicRoute>
-                    <Register />
-                  </PublicRoute>
-                }
-              />
+
               {/* Catch all route */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
