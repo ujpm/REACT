@@ -16,12 +16,14 @@ import {
   SelectChangeEvent
 } from '@mui/material';
 import { PhotoCamera, Send } from '@mui/icons-material';
+import LocationPicker from '../../components/LocationPicker';
 
 interface IssueData {
   title: string;
   description: string;
   category: string;
   location: string;
+  coordinates: [number, number];
   images: File[];
 }
 
@@ -31,6 +33,7 @@ const ReportIssue: React.FC = () => {
     description: '',
     category: '',
     location: '',
+    coordinates: [0, 0],
     images: []
   });
   const [loading, setLoading] = useState(false);
@@ -80,6 +83,7 @@ const ReportIssue: React.FC = () => {
         description: '',
         category: '',
         location: '',
+        coordinates: [0, 0],
         images: []
       });
     } catch (error) {
@@ -134,13 +138,15 @@ const ReportIssue: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              name="location"
-              label="Location"
-              value={issueData.location}
-              onChange={handleInputChange}
+            <LocationPicker
+              onLocationSelect={({ address, coordinates }) => {
+                setIssueData(prev => ({
+                  ...prev,
+                  location: address,
+                  coordinates: coordinates
+                }));
+              }}
+              initialLocation={issueData.location}
             />
           </Grid>
 
