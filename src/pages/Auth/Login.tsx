@@ -35,9 +35,7 @@ const Login: React.FC = () => {
 
   return (
     <Container component="main" maxWidth="xs">
-      <Boxsteps) but first start by setting some common credintials for admin: e: admin@react.act, pw: 2ACT, for user set e: reactor@gmail.com, pw: 2test
-      
-      
+      <Box
         sx={{
           marginTop: 8,
           display: 'flex',
