@@ -133,7 +133,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <MapClickHandler onLocationSelect={handleMapClick} />
-          {position && <Marker position={position as LatLng} />}
+          {position && <Marker position={new LatLng(position[0], position[1])} />}
         </MapContainer>
       </Box>
     </Paper>
