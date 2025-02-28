@@ -8,38 +8,47 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-const Main = styled('main')(({ theme }) => ({
-  flexGrow: 1,
-  minHeight: '100vh',
+const DRAWER_WIDTH = 240;
+const COLLAPSED_DRAWER_WIDTH = 65;
+
+const LayoutRoot = styled(Box)({
   display: 'flex',
-  flexDirection: 'column',
+  minHeight: '100vh',
+  overflow: 'hidden',
+  width: '100%'
+});
+
+const LayoutContent = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flex: '1 1 auto',
+  overflow: 'hidden',
+  paddingTop: 64, // Header height
   backgroundColor: theme.palette.background.default,
-  marginLeft: 65, // Width of collapsed sidebar
-  width: `calc(100% - 65px)`,
-  transition: theme.transitions.create(['margin', 'width'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
 }));
 
-const ContentWrapper = styled(Box)(({ theme }) => ({
-  flexGrow: 1,
-  padding: theme.spacing(3),
-  paddingTop: theme.spacing(3),
-}));
+const MainContent = styled(Box)({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: '1 1 auto',
+  overflow: 'auto',
+  position: 'relative',
+  marginLeft: COLLAPSED_DRAWER_WIDTH,
+  padding: '24px',
+  transition: 'margin-left 0.3s ease',
+});
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <LayoutRoot>
       <Header />
-      <Sidebar />
-      <Main>
-        <ContentWrapper>
+      <LayoutContent>
+        <Sidebar />
+        <MainContent>
           {children}
-        </ContentWrapper>
-        <Footer />
-      </Main>
-    </Box>
+          <Footer />
+        </MainContent>
+      </LayoutContent>
+    </LayoutRoot>
   );
 };
 

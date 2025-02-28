@@ -21,18 +21,11 @@ import {
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  Report as ReportIcon,
-  Timeline as TimelineIcon,
-  Security as SecurityIcon,
-  TrendingUp as TrendingUpIcon,
-  Handshake as HandshakeIcon,
-  Campaign as CampaignIcon,
-  Groups as GroupsIcon,
-  EmojiEvents as EmojiEventsIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { navigationItems } from '../../config/navigation';
 
 const DRAWER_WIDTH = 240;
 const COLLAPSED_DRAWER_WIDTH = 65;
@@ -57,13 +50,15 @@ const StyledDrawer = styled(Drawer, {
     backgroundColor: theme.palette.background.paper,
     overflowX: 'hidden',
     borderRight: `1px solid ${theme.palette.divider}`,
-    marginTop: 64, // Header height
+    height: `calc(100% - 64px)`,
+    top: 64,
+    position: 'fixed',
   },
 }));
 
 interface StyledListItemProps {
   active: number;
-  itemtype: 'react' | 'act';
+  itemtype: 'REACT' | 'ACT';
 }
 
 const StyledListItemButton = styled(ListItemButton)<StyledListItemProps>(({ theme, active, itemtype }) => ({
@@ -74,95 +69,26 @@ const StyledListItemButton = styled(ListItemButton)<StyledListItemProps>(({ them
     duration: theme.transitions.duration.standard,
   }),
   '&:hover': {
-    backgroundColor: itemtype === 'react' 
+    backgroundColor: itemtype === 'REACT' 
       ? `${theme.palette.primary.main}15`
       : `${theme.palette.secondary.main}15`,
     '& .MuiListItemIcon-root': {
-      color: itemtype === 'react' 
+      color: itemtype === 'REACT' 
         ? theme.palette.primary.main
         : theme.palette.secondary.main,
     },
   },
   ...(active && {
-    backgroundColor: itemtype === 'react' 
+    backgroundColor: itemtype === 'REACT' 
       ? `${theme.palette.primary.main}15`
       : `${theme.palette.secondary.main}15`,
     '& .MuiListItemIcon-root': {
-      color: itemtype === 'react' 
+      color: itemtype === 'REACT' 
         ? theme.palette.primary.main
         : theme.palette.secondary.main,
     },
   }),
 }));
-
-interface NavItem {
-  title: string;
-  path: string;
-  icon: React.ReactNode;
-  type: 'react' | 'act';
-  description: string;
-}
-
-const navItems: NavItem[] = [
-  // REACT Features
-  {
-    title: 'Report Issue',
-    path: '/report-issue',
-    icon: <ReportIcon />,
-    type: 'react',
-    description: 'Submit new community issues'
-  },
-  {
-    title: 'Track Issues',
-    path: '/track-issues',
-    icon: <TimelineIcon />,
-    type: 'react',
-    description: 'Monitor reported issues'
-  },
-  {
-    title: 'Confidential Reports',
-    path: '/confidential-reports',
-    icon: <SecurityIcon />,
-    type: 'react',
-    description: 'Submit sensitive reports'
-  },
-  {
-    title: 'Trending Issues',
-    path: '/trending-issues',
-    icon: <TrendingUpIcon />,
-    type: 'react',
-    description: 'View community hotspots'
-  },
-  // ACT Features
-  {
-    title: 'Volunteer & Donate',
-    path: '/volunteer',
-    icon: <HandshakeIcon />,
-    type: 'act',
-    description: 'Support community initiatives'
-  },
-  {
-    title: 'Campaigns',
-    path: '/campaigns',
-    icon: <CampaignIcon />,
-    type: 'act',
-    description: 'Join awareness drives'
-  },
-  {
-    title: 'Collaborate',
-    path: '/collaborate',
-    icon: <GroupsIcon />,
-    type: 'act',
-    description: 'Work with organizations'
-  },
-  {
-    title: 'Achievements',
-    path: '/achievements',
-    icon: <EmojiEventsIcon />,
-    type: 'act',
-    description: 'View community impact'
-  },
-];
 
 const Sidebar: React.FC = () => {
   const theme = useTheme();
@@ -188,6 +114,13 @@ const Sidebar: React.FC = () => {
         variant="permanent"
         anchor="left"
         collapsed={collapsed}
+        sx={{
+          width: collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH,
+          },
+        }}
       >
         <List>
           <ListItem
@@ -201,7 +134,7 @@ const Sidebar: React.FC = () => {
               {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
             </IconButton>
           </ListItem>
-          {navItems.map((item) => (
+          {navigationItems.map((item) => (
             <Tooltip 
               key={item.path}
               title={collapsed ? item.title : ''}
@@ -226,7 +159,7 @@ const Sidebar: React.FC = () => {
                       color: 'text.secondary',
                     }}
                   >
-                    {item.icon}
+                    <item.icon />
                   </ListItemIcon>
                   <ListItemText
                     primary={item.title}
