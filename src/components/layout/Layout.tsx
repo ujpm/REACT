@@ -2,15 +2,12 @@ import React from 'react';
 import { Box } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import { useLocation } from 'react-router-dom';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const location = useLocation();
-
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
