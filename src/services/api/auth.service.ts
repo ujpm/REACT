@@ -25,7 +25,7 @@ class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/users/login', credentials);
     this.setAuthData(response.data);
-    return response.data;
+    return { ...response.data };
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {

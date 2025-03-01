@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Box, Container, Paper, TextField, Button, Typography, Alert } from '@mui/material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import authService from '../../services/api/auth.service';
+import { login } from '../../store/slices/authSlice';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -23,11 +26,19 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await authService.login({
+      const response = await authService.login({
         email: formData.email,
         password: formData.password,
       });
-      navigate('/dashboard');
+      
+      // Dispatch login action to update Redux state
+      dispatch(login({
+        user: response.user,
+        token: response.token
+      }));
+      
+      // Navigate to home page
+      navigate('/');
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'An error occurred during login. Please try again later.';
       setError(errorMessage);
