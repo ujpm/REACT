@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, Button, Stack, Tabs, Tab, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Stack, Tabs, Tab, Box, useTheme, useMediaQuery } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
@@ -10,6 +10,8 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -36,16 +38,21 @@ const Header: React.FC = () => {
     navigate('/');
   };
 
+  const handleLogoClick = () => {
+    navigate(isAuthenticated ? '/react/home' : '/');
+  };
+
   return (
     <AppBar 
-      position="static" 
+      position="fixed" 
       sx={{ 
         backgroundColor: 'background.paper',
         color: 'text.primary',
         boxShadow: 1,
+        zIndex: theme.zIndex.drawer + 1,
       }}
     >
-      <Toolbar>
+      <Toolbar sx={{ pl: isMobile ? '72px' : '24px' }}>
         <Typography 
           variant="h6" 
           component="div" 
@@ -54,9 +61,12 @@ const Header: React.FC = () => {
             color: 'primary.main',
             fontWeight: 'bold',
             letterSpacing: 1,
-            marginRight: 4
+            marginRight: 4,
+            '&:hover': {
+              opacity: 0.8,
+            },
           }} 
-          onClick={() => navigate('/')}
+          onClick={handleLogoClick}
         >
           REACT
         </Typography>
