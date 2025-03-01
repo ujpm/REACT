@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "rm -rf dist && tsc",
     "postinstall": "npm run build",
     "test": "jest"
   },
@@ -27,6 +27,7 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.11.0",
+    "typescript": "^5.8.2",
     "wolfram-alpha-api": "^0.2.1"
   },
   "devDependencies": {
@@ -38,8 +39,7 @@
     "@types/mongoose": "^5.11.96",
     "@types/node": "^22.13.6",
     "nodemon": "^3.1.9",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "ts-node": "^10.9.2"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -13,7 +13,7 @@ const app: Express = express();
 
 // CORS configuration
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173', // Your Cloudflare domain
+  process.env.FRONTEND_URL || 'http://localhost:5173',
   'http://localhost:3000',
   'http://localhost:5173'
 ];
@@ -48,12 +48,24 @@ app.use('/api/users', userRoutes);
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV,
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
 });
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  console.error('Error details:', err);
+  console.error('Error details:', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    body: req.body,
+    query: req.query
+  });
   
   if (err.name === 'ValidationError') {
     res.status(400).json({ error: err.message });
@@ -76,32 +88,58 @@ app.use((req: Request, res: Response) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/react-civic';
-const DB_NAME = process.env.DB_NAME || 'REACT';
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// Extract the base URI without database name
-const baseUri = MONGODB_URI.includes('mongodb+srv://') 
-  ? MONGODB_URI.split('?')[0]
-  : MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('FATAL ERROR: MONGODB_URI environment variable is not set');
+  process.exit(1);
+}
 
-// Append database name if not already present
-const fullUri = baseUri.endsWith('/') 
-  ? `${baseUri}${DB_NAME}?${MONGODB_URI.split('?')[1] || ''}`
-  : `${baseUri}/${DB_NAME}?${MONGODB_URI.split('?')[1] || ''}`;
-
-console.log('Connecting to MongoDB...');
-// Connect to MongoDB with more detailed logging
-mongoose
-  .connect(fullUri)
-  .then(() => {
-    console.log('Successfully connected to MongoDB');
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+// MongoDB connection with retries
+const connectWithRetry = (retries = 5) => {
+  console.log(`MongoDB connection attempt ${6 - retries}`);
+  
+  mongoose
+    .connect(MONGODB_URI)
+    .then(() => {
+      console.log('Successfully connected to MongoDB');
+      // Only start server after successful DB connection
+      app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+        console.log('Environment:', process.env.NODE_ENV);
+        console.log('Frontend URL:', process.env.FRONTEND_URL);
+      });
+    })
+    .catch((error) => {
+      console.error('MongoDB connection error:', {
+        message: error.message,
+        code: error.code,
+        name: error.name
+      });
+      
+      if (retries > 0) {
+        console.log(`Retrying connection in 5 seconds... (${retries} attempts left)`);
+        setTimeout(() => connectWithRetry(retries - 1), 5000);
+      } else {
+        console.error('Failed to connect to MongoDB after multiple attempts');
+        process.exit(1);
+      }
     });
-  })
-  .catch((error) => {
-    console.error('MongoDB connection error details:', error);
-    process.exit(1);
-  });
+};
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+// Start the connection process
+connectWithRetry();
 
 export default app;
