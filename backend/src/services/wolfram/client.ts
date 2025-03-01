@@ -5,13 +5,21 @@ export class WolframService {
 
   constructor(appId: string) {
     if (!appId) {
-      throw new Error('Wolfram Alpha API key is required');
+      console.warn('Wolfram Alpha API key not provided. Analysis features will be limited.');
+      return;
     }
     this.client = new WolframAlphaAPI(appId);
   }
 
   async analyzeIssue(description: string) {
     try {
+      if (!this.client) {
+        return {
+          analysis: 'Analysis not available - Wolfram Alpha API key not configured',
+          confidence: 'low'
+        };
+      }
+
       const prompt = `Analyze this civic issue: ${description}`;
       const analysis = await this.client.getShort(prompt);
       return {
@@ -20,7 +28,10 @@ export class WolframService {
       };
     } catch (error) {
       console.error('Wolfram Alpha analysis error:', error);
-      throw new Error('Failed to analyze issue with Wolfram Alpha');
+      return {
+        analysis: 'Failed to analyze issue',
+        confidence: 'low'
+      };
     }
   }
 }
