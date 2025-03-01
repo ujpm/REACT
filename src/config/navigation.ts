@@ -24,7 +24,7 @@ export const navigationItems: NavItem[] = [
   {
     id: 'report-issue',
     title: 'Report Issue',
-    path: '/report-issue',
+    path: '/react/report-issue',
     icon: ReportProblemIcon,
     type: 'REACT',
     description: 'AI-powered issue reporting and categorization'
@@ -32,7 +32,7 @@ export const navigationItems: NavItem[] = [
   {
     id: 'track-issues',
     title: 'Track Issues',
-    path: '/track-issues',
+    path: '/react/track-issues',
     icon: TrackChangesIcon,
     type: 'REACT',
     description: 'Real-time tracking & status updates'
@@ -40,7 +40,7 @@ export const navigationItems: NavItem[] = [
   {
     id: 'confidential',
     title: 'Confidential Reports',
-    path: '/confidential-reports',
+    path: '/react/confidential-reports',
     icon: SecurityIcon,
     type: 'REACT',
     description: 'Secure channel for sensitive issues'
@@ -48,7 +48,7 @@ export const navigationItems: NavItem[] = [
   {
     id: 'trending',
     title: 'Trending Issues',
-    path: '/trending-issues',
+    path: '/react/trending-issues',
     icon: TrendingUpIcon,
     type: 'REACT',
     description: 'Community-voted urgent concerns'
@@ -58,7 +58,7 @@ export const navigationItems: NavItem[] = [
   {
     id: 'volunteer',
     title: 'Volunteer & Donate',
-    path: '/volunteer',
+    path: '/act/volunteer',
     icon: VolunteerActivismIcon,
     type: 'ACT',
     description: 'Support community projects'
@@ -66,7 +66,7 @@ export const navigationItems: NavItem[] = [
   {
     id: 'campaigns',
     title: 'Campaigns',
-    path: '/campaigns',
+    path: '/act/campaigns',
     icon: CampaignIcon,
     type: 'ACT',
     description: 'Launch & join awareness initiatives'
@@ -74,7 +74,7 @@ export const navigationItems: NavItem[] = [
   {
     id: 'collaborate',
     title: 'Collaborate',
-    path: '/collaborate',
+    path: '/act/collaborate',
     icon: HandshakeIcon,
     type: 'ACT',
     description: 'Partner with NGOs & government'
@@ -82,7 +82,7 @@ export const navigationItems: NavItem[] = [
   {
     id: 'achievements',
     title: 'Achievements',
-    path: '/achievements',
+    path: '/act/achievements',
     icon: EmojiEventsIcon,
     type: 'ACT',
     description: 'View rewards and recognition'

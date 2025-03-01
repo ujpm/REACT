@@ -5,10 +5,6 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
 const DRAWER_WIDTH = 240;
 const COLLAPSED_DRAWER_WIDTH = 65;
 
