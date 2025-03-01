@@ -2,8 +2,8 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Home from '../pages/Home';
-import Login from '../pages/auth/Login';
-import Register from '../pages/auth/Register';
+import Login from '../pages/Auth/Login';
+import Register from '../pages/Auth/Register';
 import Layout from '../components/layout/Layout';
 import { RootState } from '../store';
 
