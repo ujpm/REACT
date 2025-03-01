@@ -12,6 +12,30 @@ const Register: React.FC = () => {
     confirmPassword: '',
   });
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {};
+    
+    if (!formData.name || formData.name.length < 2) {
+      errors.name = 'Name must be at least 2 characters long';
+    }
+    
+    if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    if (!formData.password || formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters long';
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -19,12 +43,13 @@ const Register: React.FC = () => {
       [e.target.name]: e.target.value,
     });
     setError(null);
+    setValidationErrors({});
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      setError('The passwords you entered do not match. Please try again.');
+    
+    if (!validateForm()) {
       return;
     }
 
@@ -84,6 +109,8 @@ const Register: React.FC = () => {
               onChange={handleChange}
               autoComplete="name"
               autoFocus
+              error={!!validationErrors.name}
+              helperText={validationErrors.name}
               sx={{ mb: 2 }}
             />
             <TextField
@@ -95,6 +122,8 @@ const Register: React.FC = () => {
               value={formData.email}
               onChange={handleChange}
               autoComplete="email"
+              error={!!validationErrors.email}
+              helperText={validationErrors.email}
               sx={{ mb: 2 }}
             />
             <TextField
@@ -105,6 +134,8 @@ const Register: React.FC = () => {
               type="password"
               value={formData.password}
               onChange={handleChange}
+              error={!!validationErrors.password}
+              helperText={validationErrors.password}
               sx={{ mb: 2 }}
             />
             <TextField
@@ -115,6 +146,8 @@ const Register: React.FC = () => {
               type="password"
               value={formData.confirmPassword}
               onChange={handleChange}
+              error={!!validationErrors.confirmPassword}
+              helperText={validationErrors.confirmPassword}
               sx={{ mb: 3 }}
             />
             <Button
