@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Box, Container, Paper, TextField, Button, Typography, Alert } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
+import authService from '../../services/api/auth.service';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -27,26 +29,15 @@ const Register: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+      await authService.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
-      } else {
-        setError(data.message || 'Registration failed. Please try again.');
-      }
-    } catch (err) {
-      setError('An error occurred during registration. Please try again later.');
+      navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'An error occurred during registration. Please try again later.';
+      setError(errorMessage);
       console.error('Registration error:', err);
     }
   };
@@ -87,13 +78,23 @@ const Register: React.FC = () => {
             <TextField
               required
               fullWidth
+              label="Full Name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              autoComplete="name"
+              autoFocus
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              required
+              fullWidth
               label="Email Address"
               name="email"
               type="email"
               value={formData.email}
               onChange={handleChange}
               autoComplete="email"
-              autoFocus
               sx={{ mb: 2 }}
             />
             <TextField

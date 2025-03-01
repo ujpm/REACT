@@ -6,7 +6,11 @@ export class ReportController {
   private wolframService: WolframService;
 
   constructor() {
-    this.wolframService = new WolframService(process.env.WOLFRAM_APP_ID || '');
+    const wolframAppId = process.env.WOLFRAM_APP_ID;
+    if (!wolframAppId) {
+      console.error('WOLFRAM_APP_ID environment variable is not set. Please check your .env file.');
+    }
+    this.wolframService = new WolframService(wolframAppId || '');
   }
 
   // Create a new report

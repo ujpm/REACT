@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Use a constant for the API URL since Vite's import.meta.env is not available in all environments
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Use Vite's environment variables
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -17,9 +17,11 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
-// Add response interceptor
+// Add response interceptor with better error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -28,6 +30,13 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    // Add better error logging
+    console.error('API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data
+    });
     return Promise.reject(error);
   }
 );
