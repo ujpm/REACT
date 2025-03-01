@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, TextField, Paper, InputAdornment, CircularProgress } from '@mui/material';
-import { LocationOn, Search } from '@mui/icons-material';
+import { Box, TextField, Paper, InputAdornment, CircularProgress, IconButton, Tooltip, Snackbar, Alert } from '@mui/material';
+import { LocationOn, Search, MyLocation, Place } from '@mui/icons-material';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -26,6 +26,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
   const [loading, setLoading] = useState(true);
   const [map, setMap] = useState<L.Map | null>(null);
   const [marker, setMarker] = useState<L.Marker | null>(null);
+  const [locationError, setLocationError] = useState<string>('');
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const initializeMap = useCallback((position: [number, number]) => {
     if (map) return;
@@ -35,8 +37,17 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(mapInstance);
 
-    const markerInstance = L.marker(position, { icon }).addTo(mapInstance);
+    const markerInstance = L.marker(position, { 
+      icon,
+      draggable: true // Make marker draggable
+    }).addTo(mapInstance);
     
+    // Handle marker drag end
+    markerInstance.on('dragend', async () => {
+      const newPos = markerInstance.getLatLng();
+      await handleLocationUpdate([newPos.lat, newPos.lng]);
+    });
+
     mapInstance.on('click', async (e: L.LeafletMouseEvent) => {
       const newPos: [number, number] = [e.latlng.lat, e.latlng.lng];
       markerInstance.setLatLng(e.latlng);
@@ -58,12 +69,42 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
       const address = data.display_name;
       setSearchText(address);
       onLocationSelect({ address, coordinates });
+      setShowSuccess(true);
     } catch (error) {
       console.error('Error getting address:', error);
       onLocationSelect({ 
         address: `${coordinates[0]}, ${coordinates[1]}`,
         coordinates 
       });
+    }
+  };
+
+  const getCurrentLocation = async () => {
+    setLoading(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        });
+      });
+      
+      const newPosition: [number, number] = [position.coords.latitude, position.coords.longitude];
+      setPosition(newPosition);
+      
+      if (map && marker) {
+        map.setView(newPosition, 16);
+        marker.setLatLng(newPosition);
+        await handleLocationUpdate(newPosition);
+      }
+      
+      setLocationError('');
+    } catch (error) {
+      console.error('Geolocation error:', error);
+      setLocationError('Could not get your current location. Please check your permissions.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,6 +116,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
     event.preventDefault();
     if (!searchText || !map || !marker) return;
 
+    setLoading(true);
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchText)}`
@@ -84,15 +126,21 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
       if (data && data[0]) {
         const newPosition: [number, number] = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
         setPosition(newPosition);
-        map.setView(newPosition, 13);
+        map.setView(newPosition, 16);
         marker.setLatLng(newPosition);
         onLocationSelect({ 
           address: data[0].display_name,
           coordinates: newPosition
         });
+        setShowSuccess(true);
+      } else {
+        setLocationError('Location not found. Please try a different search term.');
       }
     } catch (error) {
       console.error('Error searching location:', error);
+      setLocationError('Error searching for location. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -134,20 +182,35 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
 
   return (
     <Paper elevation={3} sx={{ p: 2 }}>
-      <Box component="form" onSubmit={handleSearchSubmit} sx={{ mb: 2 }}>
+      <Box component="form" onSubmit={handleSearchSubmit} sx={{ mb: 2, display: 'flex', gap: 1 }}>
         <TextField
           fullWidth
           value={searchText}
           onChange={handleSearchChange}
           placeholder="Search location or click on map"
+          error={!!locationError}
+          helperText={locationError}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search />
+                <Place />
               </InputAdornment>
             ),
           }}
         />
+        <Tooltip title="Go to my location">
+          <IconButton 
+            onClick={getCurrentLocation}
+            color="primary"
+            size="large"
+            sx={{ 
+              bgcolor: 'primary.light',
+              '&:hover': { bgcolor: 'primary.main', color: 'white' }
+            }}
+          >
+            <MyLocation />
+          </IconButton>
+        </Tooltip>
       </Box>
       <Box sx={{ 
         height: 400, 
@@ -174,6 +237,16 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
         )}
         <div id="map" style={{ height: '100%', width: '100%' }} />
       </Box>
+      <Snackbar 
+        open={showSuccess} 
+        autoHideDuration={3000} 
+        onClose={() => setShowSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Location selected successfully!
+        </Alert>
+      </Snackbar>
     </Paper>
   );
 };
