@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import { LatLng, Icon } from 'leaflet';
-import { Box, TextField, Paper, InputAdornment } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, TextField, Paper, InputAdornment, CircularProgress } from '@mui/material';
 import { LocationOn, Search } from '@mui/icons-material';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default marker icon
-delete (Icon.Default.prototype as any)._getIconUrl;
-Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+const icon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
 interface LocationPickerProps {
@@ -18,64 +20,37 @@ interface LocationPickerProps {
   initialLocation?: string;
 }
 
-interface MapClickHandlerProps {
-  onLocationSelect: (coordinates: [number, number]) => void;
-}
-
-const MapClickHandler: React.FC<MapClickHandlerProps> = ({ onLocationSelect }) => {
-  const map = useMapEvents({
-    click(e) {
-      const { lat, lng } = e.latlng;
-      onLocationSelect([lat, lng]);
-      map.flyTo(e.latlng, map.getZoom());
-    },
-  });
-  return null;
-};
-
 const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initialLocation }) => {
   const [searchText, setSearchText] = useState(initialLocation || '');
-  const [position, setPosition] = useState<[number, number]>([0, 0]);
-  const [hasPosition, setHasPosition] = useState(false);
+  const [position, setPosition] = useState<[number, number]>([51.505, -0.09]);
+  const [loading, setLoading] = useState(true);
+  const [map, setMap] = useState<L.Map | null>(null);
+  const [marker, setMarker] = useState<L.Marker | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  const initializeMap = useCallback((position: [number, number]) => {
+    if (map) return;
 
-    const getLocation = async () => {
-      try {
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
-          });
-        });
-        
-        if (mounted) {
-          setPosition([position.coords.latitude, position.coords.longitude]);
-          setHasPosition(true);
-        }
-      } catch (error) {
-        console.log('Geolocation error:', error);
-        if (mounted) {
-          // Default to a fallback position
-          setPosition([51.505, -0.09]);
-          setHasPosition(true);
-        }
-      }
-    };
+    const mapInstance = L.map('map').setView(position, 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(mapInstance);
 
-    getLocation();
+    const markerInstance = L.marker(position, { icon }).addTo(mapInstance);
+    
+    mapInstance.on('click', async (e: L.LeafletMouseEvent) => {
+      const newPos: [number, number] = [e.latlng.lat, e.latlng.lng];
+      markerInstance.setLatLng(e.latlng);
+      await handleLocationUpdate(newPos);
+    });
 
-    return () => {
-      mounted = false;
-    };
+    setMap(mapInstance);
+    setMarker(markerInstance);
+    setLoading(false);
   }, []);
 
-  const handleMapClick = async (coordinates: [number, number]) => {
+  const handleLocationUpdate = async (coordinates: [number, number]) => {
     setPosition(coordinates);
     try {
-      // Reverse geocoding using OpenStreetMap Nominatim
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coordinates[0]}&lon=${coordinates[1]}`
       );
@@ -98,10 +73,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
 
   const handleSearchSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!searchText) return;
+    if (!searchText || !map || !marker) return;
 
     try {
-      // Forward geocoding using OpenStreetMap Nominatim
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchText)}`
       );
@@ -110,6 +84,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
       if (data && data[0]) {
         const newPosition: [number, number] = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
         setPosition(newPosition);
+        map.setView(newPosition, 13);
+        marker.setLatLng(newPosition);
         onLocationSelect({ 
           address: data[0].display_name,
           coordinates: newPosition
@@ -120,9 +96,41 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
     }
   };
 
-  if (!hasPosition) {
-    return <Box>Loading map...</Box>;
-  }
+  useEffect(() => {
+    let mounted = true;
+
+    const getLocation = async () => {
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+          });
+        });
+        
+        if (mounted) {
+          const newPosition: [number, number] = [position.coords.latitude, position.coords.longitude];
+          setPosition(newPosition);
+          initializeMap(newPosition);
+        }
+      } catch (error) {
+        console.log('Geolocation error:', error);
+        if (mounted) {
+          initializeMap([51.505, -0.09]);
+        }
+      }
+    };
+
+    getLocation();
+
+    return () => {
+      mounted = false;
+      if (map) {
+        map.remove();
+      }
+    };
+  }, [initializeMap]);
 
   return (
     <Paper elevation={3} sx={{ p: 2 }}>
@@ -141,20 +149,30 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
           }}
         />
       </Box>
-      <Box sx={{ height: 400, width: '100%', '& .leaflet-container': { height: '100%', width: '100%', borderRadius: 1 } }}>
-        <MapContainer
-          key={`${position[0]}-${position[1]}`}
-          center={position}
-          zoom={13}
-          scrollWheelZoom={false}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <MapClickHandler onLocationSelect={handleMapClick} />
-          {position && <Marker position={position} />}
-        </MapContainer>
+      <Box sx={{ 
+        height: 400, 
+        width: '100%', 
+        position: 'relative',
+        borderRadius: 1,
+        overflow: 'hidden'
+      }}>
+        {loading && (
+          <Box sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'rgba(255,255,255,0.8)',
+            zIndex: 1000
+          }}>
+            <CircularProgress />
+          </Box>
+        )}
+        <div id="map" style={{ height: '100%', width: '100%' }} />
       </Box>
     </Paper>
   );
