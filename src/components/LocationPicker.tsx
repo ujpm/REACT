@@ -39,18 +39,37 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
   const [hasPosition, setHasPosition] = useState(false);
 
   useEffect(() => {
-    // Get user's current location on component mount
-    navigator.geolocation.getCurrentPosition(
-      (location) => {
-        setPosition([location.coords.latitude, location.coords.longitude]);
-        setHasPosition(true);
-      },
-      () => {
-        // Default position if geolocation is denied (you can set this to your city's coordinates)
-        setPosition([51.505, -0.09]);
-        setHasPosition(true);
+    let mounted = true;
+
+    const getLocation = async () => {
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+          });
+        });
+        
+        if (mounted) {
+          setPosition([position.coords.latitude, position.coords.longitude]);
+          setHasPosition(true);
+        }
+      } catch (error) {
+        console.log('Geolocation error:', error);
+        if (mounted) {
+          // Default to a fallback position
+          setPosition([51.505, -0.09]);
+          setHasPosition(true);
+        }
       }
-    );
+    };
+
+    getLocation();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleMapClick = async (coordinates: [number, number]) => {
@@ -124,16 +143,17 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect, initi
       </Box>
       <Box sx={{ height: 400, width: '100%', '& .leaflet-container': { height: '100%', width: '100%', borderRadius: 1 } }}>
         <MapContainer
+          key={`${position[0]}-${position[1]}`}
           center={position}
           zoom={13}
-          style={{ height: '100%', width: '100%' }}
+          scrollWheelZoom={false}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <MapClickHandler onLocationSelect={handleMapClick} />
-          {position && <Marker position={new LatLng(position[0], position[1])} />}
+          {position && <Marker position={position} />}
         </MapContainer>
       </Box>
     </Paper>
