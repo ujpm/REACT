@@ -1,133 +1,131 @@
 import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { User, IUser } from '../models/User';
+import { User } from '../models/User';
+
+interface AuthRequest extends Request {
+  user?: any; // We'll improve this type later
+}
 
 export class UserController {
-  // Register new user
-  register = async (req: Request, res: Response) => {
+  async register(req: Request, res: Response) {
     try {
-      const { email, password, name } = req.body;
+      const { email, password } = req.body;
 
       // Check if user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        return res.status(400).json({ error: 'Email already registered' });
+        return res.status(400).json({ message: 'User already exists' });
       }
+
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
 
       // Create new user
       const user = new User({
         email,
-        password,
-        name,
+        password: hashedPassword,
       });
 
       await user.save();
 
-      // Generate token
-      const token = this.generateToken(user);
+      // Create JWT token
+      const token = jwt.sign(
+        { userId: user._id },
+        process.env.JWT_SECRET || 'default_secret',
+        { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
+      );
 
       res.status(201).json({
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
+        message: 'User registered successfully',
+        user: { id: user._id, email: user.email },
         token,
       });
     } catch (error) {
       console.error('Registration error:', error);
-      res.status(500).json({ error: 'Error registering user' });
+      res.status(500).json({ message: 'Error registering user' });
     }
-  };
+  }
 
-  // Login user
-  login = async (req: Request, res: Response) => {
+  async login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
 
-      // Find user by email
+      // Find user
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+        return res.status(401).json({ message: 'Invalid credentials' });
       }
 
-      // Check password
-      const isMatch = await user.comparePassword(password);
+      // Verify password
+      const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+        return res.status(401).json({ message: 'Invalid credentials' });
       }
 
-      // Generate token
-      const token = this.generateToken(user);
+      // Create JWT token
+      const token = jwt.sign(
+        { userId: user._id },
+        process.env.JWT_SECRET || 'default_secret',
+        { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
+      );
 
       res.json({
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
+        user: { id: user._id, email: user.email },
         token,
       });
     } catch (error) {
       console.error('Login error:', error);
-      res.status(500).json({ error: 'Error logging in' });
+      res.status(500).json({ message: 'Error logging in' });
     }
-  };
+  }
 
-  // Get user profile
-  getProfile = async (req: Request, res: Response) => {
+  async getProfile(req: AuthRequest, res: Response) {
     try {
-      const user = await User.findById(req.user?._id).select('-password');
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+      if (!req.user?.userId) {
+        return res.status(401).json({ message: 'Not authorized' });
       }
+
+      const user = await User.findById(req.user.userId).select('-password');
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
       res.json(user);
     } catch (error) {
       console.error('Get profile error:', error);
-      res.status(500).json({ error: 'Error fetching profile' });
+      res.status(500).json({ message: 'Error fetching profile' });
     }
-  };
+  }
 
-  // Update user profile
-  updateProfile = async (req: Request, res: Response) => {
-    const updates = Object.keys(req.body);
-    const allowedUpdates = ['name', 'email', 'password'];
-    const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
-
-    if (!isValidOperation) {
-      return res.status(400).json({ error: 'Invalid updates' });
-    }
-
+  async updateProfile(req: AuthRequest, res: Response) {
     try {
-      const user = await User.findById(req.user?._id);
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+      if (!req.user?.userId) {
+        return res.status(401).json({ message: 'Not authorized' });
       }
 
-      updates.forEach((update) => {
-        user[update as keyof IUser] = req.body[update];
-      });
+      const user = await User.findById(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
 
+      // Update only allowed fields
+      const allowedUpdates = ['name', 'email'];
+      const updates = Object.keys(req.body)
+        .filter(key => allowedUpdates.includes(key))
+        .reduce((obj: any, key) => {
+          obj[key] = req.body[key];
+          return obj;
+        }, {});
+
+      Object.assign(user, updates);
       await user.save();
-      res.json({
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
-      });
+
+      res.json({ user: { id: user._id, email: user.email, name: user.name } });
     } catch (error) {
       console.error('Update profile error:', error);
-      res.status(500).json({ error: 'Error updating profile' });
+      res.status(500).json({ message: 'Error updating profile' });
     }
-  };
-
-  private generateToken(user: IUser): string {
-    return jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
-      expiresIn: '7d',
-    });
   }
 }
