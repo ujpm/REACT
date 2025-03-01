@@ -94,6 +94,46 @@ backend/
 
 ---
 
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js v18.17.1
+- npm (comes with Node.js)
+
+### Installation
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Copy `.env.example` to `.env` and update the variables if needed:
+   ```bash
+   cp .env.example .env
+   ```
+
+### Development
+Run the development server:
+```bash
+npm run dev
+```
+
+### Building for Production
+```bash
+npm run build
+```
+
+### Test Credentials
+While the backend server is under maintenance, you can use these test credentials to access the app:
+
+- **Email:** `test@react.com`
+- **Password:** `test123`
+
+These credentials will work even when the backend is offline, allowing you to test the app's frontend functionality.
+
+**Note:** These are temporary test credentials and should not be used in production.
+
+---
+
 ## ✨ **Join the Movement!**  
 **REACT** is more than an app—it’s a **revolution in civic engagement**. Whether you’re reporting issues, driving change, or supporting public causes, your actions **shape the future of your community**.  
 
