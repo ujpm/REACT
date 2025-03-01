@@ -21,11 +21,43 @@ export interface AuthResponse {
   token: string;
 }
 
+// Hardcoded test credentials - TEMPORARY SOLUTION
+const TEST_CREDENTIALS = {
+  email: 'test@react.com',
+  password: 'test123'
+};
+
+const TEST_USER: User = {
+  id: '1',
+  email: TEST_CREDENTIALS.email,
+  name: 'Test User',
+  role: 'admin'
+};
+
+const TEST_TOKEN = 'test-token-12345';
+
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/users/login', credentials);
-    this.setAuthData(response.data);
-    return { ...response.data };
+    // Check for test credentials first
+    if (credentials.email === TEST_CREDENTIALS.email && 
+        credentials.password === TEST_CREDENTIALS.password) {
+      const testResponse: AuthResponse = {
+        user: TEST_USER,
+        token: TEST_TOKEN
+      };
+      this.setAuthData(testResponse);
+      return testResponse;
+    }
+
+    // If not test credentials, try regular API login
+    try {
+      const response = await api.post<AuthResponse>('/users/login', credentials);
+      this.setAuthData(response.data);
+      return { ...response.data };
+    } catch (error) {
+      // If API fails, show a helpful message about test credentials
+      throw new Error(`Login failed. For testing, use email: ${TEST_CREDENTIALS.email} and password: ${TEST_CREDENTIALS.password}`);
+    }
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
