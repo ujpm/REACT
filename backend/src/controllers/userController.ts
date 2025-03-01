@@ -10,7 +10,16 @@ interface AuthRequest extends Request {
 export class UserController {
   async register(req: Request, res: Response) {
     try {
-      const { email, password } = req.body;
+      const { email, password, name } = req.body;
+
+      // Validate required fields
+      if (!email || !password || !name) {
+        return res.status(400).json({ 
+          message: 'Missing required fields',
+          required: ['email', 'password', 'name'],
+          received: Object.keys(req.body)
+        });
+      }
 
       // Check if user already exists
       const existingUser = await User.findOne({ email });
@@ -18,14 +27,12 @@ export class UserController {
         return res.status(400).json({ message: 'User already exists' });
       }
 
-      // Hash password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-
       // Create new user
       const user = new User({
         email,
-        password: hashedPassword,
+        password,
+        name,
+        role: 'user'
       });
 
       await user.save();
@@ -39,18 +46,30 @@ export class UserController {
 
       res.status(201).json({
         message: 'User registered successfully',
-        user: { id: user._id, email: user.email },
+        user: { id: user._id, email: user.email, name: user.name },
         token,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
-      res.status(500).json({ message: 'Error registering user' });
+      res.status(500).json({ 
+        message: 'Error registering user',
+        error: error.message 
+      });
     }
   }
 
   async login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
+
+      // Validate required fields
+      if (!email || !password) {
+        return res.status(400).json({ 
+          message: 'Missing required fields',
+          required: ['email', 'password'],
+          received: Object.keys(req.body)
+        });
+      }
 
       // Find user
       const user = await User.findOne({ email });
@@ -72,12 +91,15 @@ export class UserController {
       );
 
       res.json({
-        user: { id: user._id, email: user.email },
+        user: { id: user._id, email: user.email, name: user.name },
         token,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
-      res.status(500).json({ message: 'Error logging in' });
+      res.status(500).json({ 
+        message: 'Error logging in',
+        error: error.message 
+      });
     }
   }
 
@@ -93,9 +115,12 @@ export class UserController {
       }
 
       res.json(user);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Get profile error:', error);
-      res.status(500).json({ message: 'Error fetching profile' });
+      res.status(500).json({ 
+        message: 'Error fetching profile',
+        error: error.message 
+      });
     }
   }
 
@@ -122,10 +147,19 @@ export class UserController {
       Object.assign(user, updates);
       await user.save();
 
-      res.json({ user: { id: user._id, email: user.email, name: user.name } });
-    } catch (error) {
+      res.json({ 
+        user: { 
+          id: user._id, 
+          email: user.email, 
+          name: user.name 
+        } 
+      });
+    } catch (error: any) {
       console.error('Update profile error:', error);
-      res.status(500).json({ message: 'Error updating profile' });
+      res.status(500).json({ 
+        message: 'Error updating profile',
+        error: error.message 
+      });
     }
   }
 }

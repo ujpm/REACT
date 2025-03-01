@@ -1,14 +1,15 @@
 import WolframAlphaAPI from 'wolfram-alpha-api';
 
 export class WolframService {
-  private client: WolframAlphaAPI;
+  private client: WolframAlphaAPI | null;
 
   constructor(appId: string) {
     if (!appId) {
       console.warn('Wolfram Alpha API key not provided. Analysis features will be limited.');
-      return;
+      this.client = null;
+    } else {
+      this.client = new WolframAlphaAPI(appId);
     }
-    this.client = new WolframAlphaAPI(appId);
   }
 
   async analyzeIssue(description: string) {

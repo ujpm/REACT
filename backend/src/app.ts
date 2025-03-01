@@ -27,7 +27,7 @@ app.get('/health', (req: Request, res: Response) => {
 
 // Global error handler
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Error details:', err);
   
   if (err.name === 'ValidationError') {
     res.status(400).json({ error: err.message });
@@ -39,7 +39,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     return;
   }
   
-  res.status(500).json({ error: 'Something went wrong!' });
+  res.status(500).json({ error: 'Something went wrong!', message: err.message });
 };
 
 app.use(errorHandler);
@@ -51,18 +51,30 @@ app.use((req: Request, res: Response) => {
 
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/react-civic';
+const DB_NAME = process.env.DB_NAME || 'REACT';
 
-// Connect to MongoDB
+// Extract the base URI without database name
+const baseUri = MONGODB_URI.includes('mongodb+srv://') 
+  ? MONGODB_URI.split('?')[0]
+  : MONGODB_URI;
+
+// Append database name if not already present
+const fullUri = baseUri.endsWith('/') 
+  ? `${baseUri}${DB_NAME}?${MONGODB_URI.split('?')[1] || ''}`
+  : `${baseUri}/${DB_NAME}?${MONGODB_URI.split('?')[1] || ''}`;
+
+console.log('Connecting to MongoDB...');
+// Connect to MongoDB with more detailed logging
 mongoose
-  .connect(MONGODB_URI)
+  .connect(fullUri)
   .then(() => {
-    console.log('Connected to MongoDB');
+    console.log('Successfully connected to MongoDB');
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
   .catch((error) => {
-    console.error('MongoDB connection error:', error);
+    console.error('MongoDB connection error details:', error);
     process.exit(1);
   });
 
